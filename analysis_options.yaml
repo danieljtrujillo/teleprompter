@@ -1,26 +1,18 @@
 analyzer:
   exclude:
-  strong-mode:
-    implicit-casts: false
-    implicit-dynamic: true
   errors:
     missing_required_param: error
     missing_return: error
   language:
     strict-inference: true
     strict-raw-types: true
-  plugins:
-    - dart_code_metrics
 
-# Linter rules in this list last updated when linter 1.23.0 has been released
-#
-# New linter rules you can find here: https://github.com/dart-lang/linter/releases
+# Linter rules in this list last updated for Dart 3.3.0
 linter:
   rules:
     always_declare_return_types: true
     always_put_control_body_on_new_line: true
     always_put_required_named_parameters_first: true
-    always_require_non_null_named_parameters: true
     always_use_package_imports: true
     annotate_overrides: true
     avoid_bool_literals_in_conditional_expressions: true
@@ -40,8 +32,6 @@ linter:
     avoid_relative_lib_imports: true
     avoid_renaming_method_parameters: true
     avoid_return_types_on_setters: true
-    avoid_returning_null: true
-    avoid_returning_null_for_future: true
     avoid_returning_null_for_void: true
     avoid_returning_this: true
     avoid_shadowing_type_parameters: true
@@ -68,12 +58,10 @@ linter:
     file_names: true
     hash_and_equals: true
     implementation_imports: true
-    iterable_contains_unrelated_type: true
     join_return_with_assignment: true
     leading_newlines_in_multiline_strings: true
     library_names: true
     library_prefixes: true
-    list_remove_unrelated_type: true
     literal_only_boolean_expressions: true
     no_adjacent_strings_in_list: true
     no_default_cases: true
@@ -98,7 +86,6 @@ linter:
     prefer_const_literals_to_create_immutables: true
     prefer_constructors_over_static_methods: true
     prefer_contains: true
-    prefer_equal_for_default_values: true
     prefer_expression_function_bodies: true
     prefer_final_fields: true
     prefer_final_in_for_each: true
@@ -177,134 +164,69 @@ linter:
     use_super_parameters: true
     use_enums: true
     use_colored_box: true
-
-    # Null safety support
-
     cast_nullable_to_non_nullable: true
     null_check_on_nullable_type_parameter: true
     unnecessary_nullable_for_final_variable_declarations: true
     use_late_for_private_fields_and_variables: true
     use_if_null_to_convert_nulls_to_bools: true
+    use_string_in_part_of_directives: true
+    unnecessary_null_checks: true
+    discarded_futures: true
+    unnecessary_breaks: true
 
-    # The following lints are disabled
-
-    always_specify_types: false
-    avoid_annotating_with_dynamic: false
-    avoid_as: false
-    avoid_catches_without_on_clauses: false
-    avoid_classes_with_only_static_members: false
-    avoid_function_literals_in_foreach_calls: false
-    avoid_js_rounded_ints: false
-    avoid_setters_without_getters: false
-    cascade_invocations: false
-    close_sinks: false
-    comment_references: false
-    diagnostic_describe_all_properties: false
-    do_not_use_environment: false
-    exhaustive_cases: false
-    flutter_style_todos: false
-    lines_longer_than_80_chars: false
-    missing_whitespace_between_adjacent_strings: false
-    one_member_abstracts: false
-    prefer_asserts_in_initializer_lists: false
-    prefer_asserts_with_message: false
-    prefer_double_quotes: false
-    prefer_if_elements_to_conditional_expressions: false
-    prefer_relative_imports: false
-    provide_deprecation_message: false
-    public_member_api_docs: false
-    sort_constructors_first: false
-    sort_pub_dependencies: false
-    tighten_type_of_initializing_formals: false
-    unnecessary_final: false
-    unnecessary_null_checks: false
-    unsafe_html: false
-    use_is_even_rather_than_modulo: false
-    use_key_in_widget_constructors: false
-    prefer_null_aware_method_calls: false
-    require_trailing_commas: false
-    depend_on_referenced_packages: false
-    prefer_final_parameters: false
-
-# Dart Code Metrics rules in this list last updated when dart-code-metrics 4.16.0 has been released
-#
-# New dart-code-metrics rules you can find here: https://github.com/dart-code-checker/dart-code-metrics/releases
+# Dart Code Metrics rules
 dart_code_metrics:
   anti-patterns:
-    - long-method # Uses source-lines-of-code metrics
-    - long-parameter-list # Uses number-of-parameters metrics
+    - long-method
+    - long-parameter-list
 
   metrics:
     number-of-parameters: 5
-    source-lines-of-code: 250 # Must be 50, it must be fixed
+    source-lines-of-code: 50
 
   rules:
-    always-remove-listener: true
-    avoid-border-all: true
-    avoid-collection-methods-with-unrelated-types: true
-    avoid-global-state: true
-    avoid-missing-enum-constant-in-map: true
-    avoid-non-ascii-symbols: true
-    avoid-non-null-assertion: false
-    avoid-throw-in-catch-block: true
-    avoid-unnecessary-setstate: true
-    avoid-unnecessary-type-assertions: true
-    avoid-unnecessary-type-casts: true
-    avoid-unrelated-type-assertions: true
-    avoid-unused-parameters: true
-    avoid-wrapping-in-padding: true
-    double-literal-format: true
-    no-equal-then-else: true
-    prefer-const-border-radius: true
-    prefer-correct-type-name: true
-    prefer-first: true
-    prefer-immediate-return: true
-    prefer-last: true
-    prefer-match-file-name: true
-    prefer-trailing-comma: true
-
-    member-ordering-extended:
-      alphabetize: false
-      alphabetize-by-type: false
-      order:
-        - private-static-fields
-        - public-static-fields
-        - private-static-getters-setters
-        - public-static-getters-setters
-        - public-static-methods
-        - private-static-methods
-        - public-fields
-        - private-const-fields
-        - private-final-fields
-        - private-late-final-fields
-        - private-var-fields
-        - private-nullable-fields
-        - private-getters-setters
-        - public-getters-setters
-        - named-constructors
-        - factory-constructors
-        - public-methods
-        - private-methods
-
-    # The following lints are disabled
-
-    avoid-dynamic: false
-    avoid-ignoring-return-values: false
-    avoid-late-keyword: false
-    avoid-nested-conditional-expressions: false
-    avoid-returning-widgets: false
-    binary-expression-operand-order: false
-    format-comment: false
-    newline-before-return: false
-    no-boolean-literal-compare: false
-    no-empty-block: false
-    no-equal-arguments: false
-    no-magic-number: false
-    no-object-declaration: false
-    prefer-async-await: false
-    prefer-commenting-analyzer-ignores: false
-    prefer-conditional-expressions: false
-    prefer-correct-identifier-length: false
-    prefer-extracting-callbacks: false
-    prefer-moving-to-variable: false
-    prefer-single-widget-per-file: false
+    - always-remove-listener
+    - avoid-border-all
+    - avoid-collection-methods-with-unrelated-types
+    - avoid-global-state
+    - avoid-missing-enum-constant-in-map
+    - avoid-non-ascii-symbols
+    - avoid-non-null-assertion
+    - avoid-throw-in-catch-block
+    - avoid-unnecessary-setstate
+    - avoid-unnecessary-type-assertions
+    - avoid-unnecessary-type-casts
+    - avoid-unrelated-type-assertions
+    - avoid-unused-parameters
+    - avoid-wrapping-in-padding
+    - double-literal-format
+    - no-equal-then-else
+    - prefer-const-border-radius
+    - prefer-correct-type-name
+    - prefer-first
+    - prefer-immediate-return
+    - prefer-last
+    - prefer-match-file-name
+    - prefer-trailing-comma
+    - member-ordering-extended:
+        alphabetize: false
+        alphabetize-by-type: false
+        order:
+          - private-static-fields
+          - public-static-fields
+          - private-static-getters-setters
+          - public-static-getters-setters
+          - public-static-methods
+          - private-static-methods
+          - public-fields
+          - private-const-fields
+          - private-final-fields
+          - private-late-final-fields
+          - private-var-fields
+          - private-nullable-fields
+          - private-getters-setters
+          - public-getters-setters
+          - named-constructors
+          - factory-constructors
+          - public-methods
+          - private-methods

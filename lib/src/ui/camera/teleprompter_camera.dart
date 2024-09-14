@@ -55,7 +55,7 @@ class _TeleprompterCameraState extends State<TeleprompterCamera>
       vsync: this,
     );
 
-    //initZoom();
+    print("TeleprompterCamera initState called");
   }
 
   @override
@@ -68,6 +68,7 @@ class _TeleprompterCameraState extends State<TeleprompterCamera>
     if (teleprompterState != null) {
       teleprompterState?.disposeCamera();
     }
+    print("TeleprompterCamera disposed");
   }
 
   @override
@@ -97,18 +98,7 @@ class _TeleprompterCameraState extends State<TeleprompterCamera>
     teleprompterState = Provider.of<TeleprompterState>(context, listen: false);
 
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(1),
-              child: Center(
-                child: _cameraPreviewWidget(),
-              ),
-            ),
-          )
-        ],
-      ),
+      body: _cameraPreviewWidget(),
     );
   }
 
@@ -117,27 +107,27 @@ class _TeleprompterCameraState extends State<TeleprompterCamera>
     final CameraController cameraController = widget.controller;
 
     if (!cameraController.value.isInitialized || cameraDisposed) {
-      cameraController.addListener(() {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-      return Container();
+      print("Camera not initialized or disposed");
+      return const Center(child: CircularProgressIndicator());
     } else {
+      print("Camera initialized and not disposed");
       return Listener(
         onPointerDown: (_) => _pointers++,
         onPointerUp: (_) => _pointers--,
-        child: CameraPreview(
-          widget.controller,
-          child: LayoutBuilder(
+        child: SizedBox.expand(
+          child: CameraPreview(
+            widget.controller,
+            child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) =>
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onScaleStart: _handleScaleStart,
-                    onScaleUpdate: _handleScaleUpdate,
-                    onTapDown: (details) =>
-                        onViewFinderTap(details, constraints),
-                  )),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onScaleStart: _handleScaleStart,
+                  onScaleUpdate: _handleScaleUpdate,
+                  onTapDown: (details) =>
+                      onViewFinderTap(details, constraints),
+                ),
+            ),
+          ),
         ),
       );
     }
@@ -168,16 +158,6 @@ class _TeleprompterCameraState extends State<TeleprompterCamera>
     );
     cameraController.setExposurePoint(offset);
     cameraController.setFocusPoint(offset);
-  }
-
-  Future<void> initZoom() async {
-    await widget.controller
-        .getMaxZoomLevel()
-        .then((value) => _maxAvailableZoom = value);
-
-    await widget.controller
-        .getMinZoomLevel()
-        .then((value) => _minAvailableZoom = value);
   }
 
   Future<void> refreshCamera() async {
