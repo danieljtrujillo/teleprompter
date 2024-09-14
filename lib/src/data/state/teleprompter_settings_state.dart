@@ -33,8 +33,8 @@ mixin TeleprompterSettingsState {
   };
 
   double _opacity = 0.7;
-  int _speedFactor = 5;
-  double _textSize = 14;
+  int _speedFactor = 10;
+  double _textSize = 20;
   Color _textColor = Colors.greenAccent;
 
   Future<void> loadSettings(
