@@ -39,10 +39,13 @@ class TeleprompterState
   // Toggles scrolling state between start, pause, and stop
   void toggleStartStop() {
     if (_scrolling && !_paused) {
+      // If scrolling, pause it
       _paused = true;
     } else if (_paused) {
+      // If paused, resume scrolling
       _paused = false;
     } else {
+      // If stopped, start scrolling
       _scrolling = true;
       _paused = false;
     }
