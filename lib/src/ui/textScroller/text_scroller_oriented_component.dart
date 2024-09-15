@@ -21,51 +21,55 @@ class TextScrollerOrientedComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TeleprompterState teleprompterState =
-        Provider.of<TeleprompterState>(context, listen: false);
+    return Consumer<TeleprompterState>(
+      builder: (context, teleprompterState, child) {
+        final MediaQueryData mediaQueryData = MediaQuery.of(context);
 
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+        final double verticalPadding =
+            mediaQueryData.padding.top + mediaQueryData.padding.bottom;
+        final double height = mediaQueryData.size.height - verticalPadding;
+        final double width = mediaQueryData.size.width;
 
-    final double verticalPadding =
-        mediaQueryData.padding.top + mediaQueryData.padding.bottom;
-    final double height = mediaQueryData.size.height - verticalPadding;
-    final double width = mediaQueryData.size.width;
+        double remainingSpace = 245;
 
-    double remainingSpace = 245;
+        if (Platform.isAndroid) {
+          remainingSpace = 175;
+        }
 
-    if (Platform.isAndroid) {
-      remainingSpace = 175;
-    }
-
-    return ExpandableComponent(
-      height: height,
-      maxHeight: height,
-      remainingSpace: remainingSpace,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollEndNotification) {
-            teleprompterState.completedScroll();
-          }
-          return true;
-        },
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              width: width,
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: teleprompterState.getTextColor(),
-                      fontSize: teleprompterState.getTextSize(),
-                    ),
+        return ExpandableComponent(
+          height: height,
+          maxHeight: height,
+          remainingSpace: remainingSpace,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scrollNotification) {
+              if (scrollNotification is ScrollEndNotification) {
+                teleprompterState.completedScroll();
+              }
+              return true;
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: teleprompterState.isScrolling()
+                  ? const NeverScrollableScrollPhysics()
+                  : const ClampingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: SizedBox(
+                  width: width,
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: teleprompterState.getTextColor(),
+                          fontSize: teleprompterState.getTextSize(),
+                        ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

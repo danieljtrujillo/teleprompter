@@ -8,6 +8,7 @@ import 'package:teleprompter/src/ui/textScroller/options/teleprompter_color_pick
 class TeleprompterState
     with ChangeNotifier, TeleprompterSettingsState, RecorderState {
   bool _scrolling = false; // Indicates if the teleprompter is scrolling
+  bool _paused = false; // Indicates if the teleprompter is paused
   int _optionIndex = 0; // Currently selected option index
   double _scrollPosition = 0; // Current scroll position
 
@@ -18,7 +19,10 @@ class TeleprompterState
   }
 
   // Returns true if the teleprompter is scrolling, false otherwise
-  bool isScrolling() => _scrolling;
+  bool isScrolling() => _scrolling && !_paused;
+
+  // Returns true if the teleprompter is paused, false otherwise
+  bool isPaused() => _paused;
 
   // Sets scrolling to false when the teleprompter completes scrolling
   void completedScroll() {
@@ -27,15 +31,21 @@ class TeleprompterState
 
   // Stops scrolling if the teleprompter is currently scrolling
   void stopScroll() {
-    if (_scrolling) {
-      _scrolling = false;
-      refresh();
-    }
+    _scrolling = false;
+    _paused = false;
+    refresh();
   }
 
-  // Toggles scrolling state between start and stop
+  // Toggles scrolling state between start, pause, and stop
   void toggleStartStop() {
-    _scrolling = !_scrolling;
+    if (_scrolling && !_paused) {
+      _paused = true;
+    } else if (_paused) {
+      _paused = false;
+    } else {
+      _scrolling = true;
+      _paused = false;
+    }
     refresh();
   }
 

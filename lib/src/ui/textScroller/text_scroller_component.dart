@@ -49,123 +49,127 @@ class TextScrollerComponent extends StatefulWidget {
 
 class _TextScrollerComponentState extends State<TextScrollerComponent>
     with TickerProviderStateMixin {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _handleScrolling(TeleprompterState teleprompterState) {
+    if (teleprompterState.isScrolling()) {
+      final double maxExtent = _scrollController.position.maxScrollExtent;
+      final double distanceDifference = maxExtent - _scrollController.offset;
+      final double durationDouble =
+          distanceDifference / teleprompterState.getSpeedFactor();
+
+      _scrollController.animateTo(
+        maxExtent,
+        duration: Duration(seconds: durationDouble.toInt()),
+        curve: Curves.linear,
+      ).then((_) {
+        if (mounted) {
+          teleprompterState.completedScroll();
+        }
+      });
+    } else if (teleprompterState.isPaused()) {
+      _scrollController.jumpTo(_scrollController.offset);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final TeleprompterState teleprompterState =
-        Provider.of<TeleprompterState>(context, listen: false);
+    return Consumer<TeleprompterState>(
+      builder: (context, teleprompterState, child) {
+        _handleScrolling(teleprompterState);
 
-    final ScrollController scrollController = ScrollController(
-        initialScrollOffset: teleprompterState.getScrollPosition());
-    scrollController.addListener(() {
-      teleprompterState.setScrollPosition(scrollController.offset);
-    });
-    AppLogger()
-        .debug('scroll controller clients: ${scrollController.hasClients}');
+        return Scaffold(
+          appBar: AppBar(
+            title: teleprompterState.isRecording()
+                ? const StopwatchWidget()
+                : FittedBox(
+                    child: Text(
+                      widget.title,
+                      overflow: TextOverflow.fade,
+                    ),
+                  ),
+            actions: [
+              teleprompterState.isRecording()
+                  ? IconButton(
+                      onPressed: () async {
+                        final bool success =
+                            await teleprompterState.stopRecording();
+                        teleprompterState.refresh();
 
-    if (teleprompterState.isScrolling()) {
-      Future.delayed(
-        const Duration(milliseconds: 500),
-        () {
-          // Check if scroller stills attached to the widget
-          if (!scrollController.hasClients) {
-            return;
-          }
+                        if (success && mounted) {
+                          MySnackBar.show(
+                            context: context,
+                            text: widget.savedToGallery,
+                          );
+                        } else if (mounted) {
+                          MySnackBar.showError(
+                            context: context,
+                            text: widget.errorSavingToGallery,
+                          );
+                        }
+                      },
+                      icon: widget.stopRecordingButton,
+                    )
+                  : IconButton(
+                      onPressed: () {
+                        teleprompterState.startRecording(teleprompterState);
+                        teleprompterState.refresh();
+                      },
+                      icon: widget.startRecordingButton,
+                    )
+            ],
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: NativeDeviceOrientationReader(
+                  builder: (context) {
+                    final orientation =
+                        NativeDeviceOrientationReader.orientation(context);
+                    AppLogger().debug('Received new orientation: $orientation');
 
-          final double maxExtent = scrollController.position.maxScrollExtent;
-          final double distanceDifference = maxExtent - scrollController.offset;
-          final double durationDouble =
-              distanceDifference / teleprompterState.getSpeedFactor();
-
-          final double max = scrollController.position.maxScrollExtent;
-          AppLogger().debug('animate to $max');
-          scrollController.animateTo(max,
-              duration: Duration(seconds: durationDouble.toInt()),
-              curve: Curves.linear);
-        },
-      );
-    } else {
-      if (scrollController.hasClients) {
-        Future.delayed(Duration.zero, () {
-          scrollController.animateTo(scrollController.offset,
-              duration: Duration.zero, curve: Curves.linear);
-        });
-      }
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: teleprompterState.isRecording()
-            ? const StopwatchWidget()
-            : FittedBox(
-                child: Text(
-                  widget.title,
-                  overflow: TextOverflow.fade,
+                    return TextScrollerOrientedComponent(
+                      _scrollController,
+                      orientation,
+                      text: widget.text,
+                    );
+                  },
                 ),
               ),
-        actions: [
-          teleprompterState.isRecording()
-              ? IconButton(
-                  onPressed: () async {
-                    final bool success =
-                        await teleprompterState.stopRecording();
+              TextScrollerOptionsComponent(
+                  index: teleprompterState.getOptionIndex(),
+                  updateIndex: (int index) {
+                    teleprompterState.updateOptionIndex(index);
                     teleprompterState.refresh();
-
-                    if (success && mounted) {
-                      MySnackBar.show(
-                        context: context,
-                        text: widget.savedToGallery,
-                      );
-                    } else if (mounted) {
-                      MySnackBar.showError(
-                        context: context,
-                        text: widget.errorSavingToGallery,
-                      );
-                    }
-                  },
-                  icon: widget.stopRecordingButton,
-                )
-              : IconButton(
-                  onPressed: () {
-                    teleprompterState.startRecording(teleprompterState);
-                    teleprompterState.refresh();
-                  },
-                  icon: widget.startRecordingButton,
-                )
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: NativeDeviceOrientationReader(
-              builder: (context) {
-                final orientation =
-                    NativeDeviceOrientationReader.orientation(context);
-                AppLogger().debug('Received new orientation: $orientation');
-
-                return TextScrollerOrientedComponent(
-                  scrollController,
-                  orientation,
-                  text: widget.text,
-                );
-              },
+                  })
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            shape: widget.floatingButtonShape,
+            onPressed: teleprompterState.toggleStartStop,
+            child: Icon(
+              teleprompterState.isScrolling()
+                  ? Icons.pause
+                  : teleprompterState.isPaused()
+                      ? Icons.play_arrow
+                      : Icons.play_arrow,
             ),
           ),
-          TextScrollerOptionsComponent(
-              index: teleprompterState.getOptionIndex(),
-              updateIndex: (int index) {
-                teleprompterState.updateOptionIndex(index);
-                teleprompterState.refresh();
-              })
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: widget.floatingButtonShape,
-        onPressed: teleprompterState.toggleStartStop,
-        child: teleprompterState.isScrolling()
-            ? const Icon(Icons.pause)
-            : const Icon(Icons.play_arrow),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        );
+      },
     );
   }
 }
